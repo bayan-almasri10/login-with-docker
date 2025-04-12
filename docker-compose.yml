@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d users_db"]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d users_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,13 +25,13 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "5000:5000"
+      - "5001:5001"
     environment:
       - FLASK_APP=app.py
       - DATABASE_URL=postgresql://admin:password@db:5432/users_db
     working_dir: /app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000"]  
+      test: [ "CMD", "curl", "-f", "http://localhost:5001" ]
       interval: 10s
       retries: 5
       start_period: 10s

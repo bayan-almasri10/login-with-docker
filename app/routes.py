@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify, render_template
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask import Blueprint, request, jsonify, render_template ,make_response
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies ,unset_jwt_cookies
 from app.models import User
 from app.extensions import db, bcrypt  
 
@@ -8,6 +8,10 @@ auth_bp = Blueprint("auth", __name__)
 # ------------------- Health Check -------------------
 @auth_bp.route("/health")  
 def health():
+    # new_user = User(username='user', email='aaa@bbb.com')
+    # new_user.set_password('user')
+    # db.session.add(new_user)
+    # db.session.commit()
     return {'status': 'healthy'}, 200
 
 # ------------------- Home/Login Page -------------------
@@ -53,7 +57,17 @@ def login():
         return jsonify({"message": "بيانات الدخول غير صحيحة"}), 401
 
     access_token = create_access_token(identity=user.id)
-    return jsonify(access_token=access_token), 200
+
+    response = jsonify({"message": "Login successful!", "username": user.username,"access_token": access_token})
+    set_access_cookies(response, access_token)
+    return response, 200
+
+# ------------------- Logout Route (New) -------------------
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    response = jsonify({"message": "Logout successful!"})
+    unset_jwt_cookies(response)
+    return response, 200
 
 # ------------------- Protected Page -------------------
 @auth_bp.route("/protected", methods=["GET"])
@@ -61,6 +75,13 @@ def login():
 def protected():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
+
+    
+    if not user:
+         
+         response = make_response(jsonify({"message": "User not found"}), 404)
+         unset_jwt_cookies(response)
+         return response
 
     if request.accept_mimetypes.accept_html:
         return render_template("protected.html", username=user.username)
