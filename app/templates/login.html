@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-4 shadow" style="width: 400px;">
+            <h3 class="text-center">تسجيل الدخول</h3>
+            <form id="loginForm">
+                <div class="mb-3">
+                  <label class="form-label">اسم المستخدم</label>
+                  <input type="text" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">كلمة المرور</label>
+                  <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-success">تسجيل الدخول</button>
+              </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
+          e.preventDefault();
+          
+          const formData = {
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value
+          };
+        
+          try {
+            const response = await fetch("/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Accept-Language": "ar" // Arabic content negotiation
+              },
+              body: JSON.stringify(formData)
+            });
+        
+            const result = await response.json();
+            
+            if (!response.ok) {
+              throw new Error(result.message || "خطأ في تسجيل الدخول");
+            }
+            
+            // Store token and redirect
+            localStorage.setItem("access_token", result.access_token);
+            window.location.href = "/protected";
+            
+          } catch (error) {
+            alert(error.message);
+            console.error("Login error:", error);
+          }
+        });
+        </script>
+</body>
+</html>

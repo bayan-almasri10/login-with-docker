@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Protected Page</title>
+</head>
+<body>
+    <h1>Welcome, <span id="username">{{ username }}</span>!</h1>
+    <button onclick="logout()">Logout</button>
+
+    <script>
+    // Send token with any API requests
+    async function makeAuthedRequest(url, method='GET') {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.json();
+    }
+
+    function logout() {
+        localStorage.removeItem('access_token');
+        window.location.href = "/";
+    }
+
+    // Example protected data fetch
+    async function loadProtectedData() {
+        try {
+            const data = await makeAuthedRequest('/api/protected-data');
+            console.log(data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    </script>
+</body>
+</html>
